@@ -10,6 +10,12 @@ DBNAME=${DB_URI[4]}
 
 export PGBOUNCER_URI=postgres://$USER:$PASS@127.0.0.1:6000/$DBNAME
 
+if [ "$PGBOUNCER_POOL_MODE" -eq "session" ]
+then
+  $PGBOUNCER_SERVER_RESET_QUERY="DISCARD ALL;"
+  $PGBOUNCER_IDLE_TRANSACTION_TIMEOUT="30.0"
+fi
+
 mkdir -p /app/vendor/stunnel/var/run/stunnel/
 cat >> /app/vendor/stunnel/stunnel-pgbouncer.conf << EOFEOF
 foreground = yes
@@ -47,8 +53,9 @@ auth_file = /app/vendor/pgbouncer/users.txt
 ;   session      - after client disconnects
 ;   transaction  - after transaction finishes
 ;   statement    - after statement finishes
-pool_mode = transaction
-server_reset_query =
+pool_mode = ${PGBOUNCER_POOL_MODE:-transaction}
+server_reset_query = ${PGBOUNCER_SERVER_RESET_QUERY:-}
+idle_transaction_timeout = ${PGBOUNCER_IDLE_TRANSACTION_TIMEOUT:-0.0}
 max_client_conn = 100
 default_pool_size = ${PGBOUNCER_DEFAULT_POOL_SIZE:-1}
 reserve_pool_size = ${PGBOUNCER_RESERVE_POOL_SIZE:-1}
