@@ -12,11 +12,13 @@ export PGBOUNCER_URI=postgres://$USER:$PASS@127.0.0.1:6000/$DBNAME
 
 if [[ "$PGBOUNCER_POOL_MODE" == "session" ]]
 then
-  $DEFAULT_SERVER_RESET_QUERY="DISCARD ALL;"
-  $DEFAULT_IDLE_TRANSACTION_TIMEOUT="30.0"
+  $pool_server_reset_query="DISCARD ALL;"
+  $pool_idle_transaction_timeout="30.0"
+  $pool_default_pool_size="20"
 else
-  $DEFAULT_SERVER_RESET_QUERY=""
-  $DEFAULT_IDLE_TRANSACTION_TIMEOUT="0.0"
+  $pool_server_reset_query=""
+  $pool_idle_transaction_timeout="0.0"
+  $pool_default_pool_size="1"
 fi
 
 mkdir -p /app/vendor/stunnel/var/run/stunnel/
@@ -57,10 +59,10 @@ auth_file = /app/vendor/pgbouncer/users.txt
 ;   transaction  - after transaction finishes
 ;   statement    - after statement finishes
 pool_mode = ${PGBOUNCER_POOL_MODE:-transaction}
-server_reset_query = ${PGBOUNCER_SERVER_RESET_QUERY:-$DEFAULT_SERVER_RESET_QUERY}
-idle_transaction_timeout = ${PGBOUNCER_IDLE_TRANSACTION_TIMEOUT:-$DEFAULT_IDLE_TRANSACTION_TIMEOUT}
+server_reset_query = ${PGBOUNCER_SERVER_RESET_QUERY:-$pool_server_reset_query}
+idle_transaction_timeout = ${PGBOUNCER_IDLE_TRANSACTION_TIMEOUT:-$pool_idle_transaction_timeout}
 max_client_conn = 100
-default_pool_size = ${PGBOUNCER_DEFAULT_POOL_SIZE:-1}
+default_pool_size = ${PGBOUNCER_DEFAULT_POOL_SIZE:-$pool_default_pool_size}
 reserve_pool_size = ${PGBOUNCER_RESERVE_POOL_SIZE:-1}
 reserve_pool_timeout = ${PGBOUNCER_RESERVE_POOL_TIMEOUT:-5.0}
 EOFEOF
